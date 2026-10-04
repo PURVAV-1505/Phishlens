@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhishLens — Visual Phishing & URL Safety Inspector</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              500: '#10b981',
+              600: '#059669',
+            },
+            danger: {
+              500: '#ef4444',
+              600: '#dc2626'
+            },
+            warning: {
+              500: '#f59e0b',
+              600: '#d97706'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500/30 selection:text-emerald-300 cyber-grid">
+
+  <!-- Header with Live System Status Indicator -->
+  <header class="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-400 p-[1px] shadow-lg shadow-emerald-500/20 group cursor-pointer">
+          <div class="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center">
+            <!-- Sleek Cyber Shield + Optical Lens Vector SVG -->
+            <svg class="w-5 h-5 text-emerald-400 transition-transform group-hover:scale-110 duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <circle cx="12" cy="11" r="3" stroke-width="2"/>
+              <path d="m14.2 13.2 2.3 2.3"/>
+            </svg>
+          </div>
+          <span class="absolute -top-1 -right-1 flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-slate-950"></span>
+          </span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl font-extrabold tracking-tight text-white">Phish<span class="text-emerald-400">Lens</span></span>
+            <span class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-semibold tracking-wide">ZERO-TRUST</span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Visual URL X-Ray & Threat Dissector</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/90 border border-slate-800 text-xs text-slate-300 shadow-inner">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-[11px] font-medium tracking-wide">Local Heuristic Engine Active</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8 flex flex-col gap-8 glow-radar">
+    
+    <!-- Hero / Visual Identity -->
+    <div class="text-center max-w-2xl mx-auto space-y-3 pt-2">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-800/40 text-emerald-400 text-xs font-semibold mb-1">
+        <span>🛡️ Digital Threat Radar</span>
+        <span>•</span>
+        <span class="text-slate-300">Instant Link Deconstruction</span>
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+        X-Ray Any Link <br>
+        <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">Before It Traps You</span>
+      </h1>
+      <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+        PhishLens exposes disguised Cyrillic letters, trap subdomains, and scam triggers directly in your browser. Simple, private, and instantaneous.
+      </p>
+    </div>
+
+    <!-- Mode Selector Tabs: URL vs File/Screenshot -->
+    <div class="flex items-center justify-center">
+      <div class="inline-flex p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl backdrop-blur-xl">
+        <button
+          type="button"
+          id="tabBtnUrl"
+          data-input-mode="url"
+          class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+          <span>Scan Link or SMS</span>
+        </button>
+        <button
+          type="button"
+          id="tabBtnFile"
+          data-input-mode="file"
+          class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-200 transition-all"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <span>Inspect Screenshot / File / APK</span>
+          <span class="px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">NEW</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Inspector Input Box: "Inspection Chamber" -->
+    <section class="relative bg-slate-900/90 rounded-2xl border border-slate-800/90 p-4 sm:p-6 shadow-2xl backdrop-blur-2xl space-y-4 overflow-hidden">
+      <div class="absolute top-0 left-0 right-0 h-[2px] scan-beam"></div>
+
+      <!-- Mode 1: URL/Text Scanner (Default) -->
+      <div id="urlInputContainer" class="space-y-4">
+        <div class="flex items-center justify-between text-xs text-slate-400 pb-1">
+          <span class="font-mono-code font-semibold flex items-center gap-1.5 text-emerald-400">
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            INPUT INSPECTION TARGET
+          </span>
+          <span class="text-slate-500">Paste SMS, email text, or URL</span>
+        </div>
+
+        <form id="urlForm" class="flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-emerald-500/70">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+            </div>
+            <input
+              id="urlInput"
+              type="text"
+              placeholder="Paste suspicious URL here (e.g., https://secure-sbi.bank-login-verify.top/)..."
+              class="w-full pl-11 pr-10 py-3.5 bg-slate-950/90 rounded-xl border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 font-mono-code text-sm transition-all shadow-inner"
+              autocomplete="off"
+              spellcheck="false"
+            >
+            <button
+              type="button"
+              id="clearBtn"
+              class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-300 transition-colors hidden"
+              title="Clear text"
+            >
+              ✕
+            </button>
+          </div>
+          <button
+            type="submit"
+            class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400 hover:brightness-110 text-slate-950 font-bold text-sm tracking-wide transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center justify-center gap-2"
+          >
+            <span>Scan Link</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </form>
+
+        <!-- Preset Sample Buttons for Quick Demo Testing -->
+        <div class="pt-3 border-t border-slate-800/80 flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-slate-400 font-semibold mr-1 flex items-center gap-1">
+            <span>⚡</span>
+            <span>Quick Demos:</span>
+          </span>
+          <button data-sample-url="https://github.com/explore" class="px-2.5 py-1.5 rounded-lg bg-emerald-950/40 border border-emerald-800/50 text-emerald-400 hover:bg-emerald-900/40 transition">
+            🟢 Safe (GitHub)
+          </button>
+          <button data-sample-url="https://secure-sbi.bank-login-verify.top/update-kyc" class="px-2.5 py-1.5 rounded-lg bg-amber-950/40 border border-amber-800/50 text-amber-300 hover:bg-amber-900/40 transition">
+            🟡 Subdomain Trap
+          </button>
+          <button data-sample-url="https://gооgle.com/accounts" class="px-2.5 py-1.5 rounded-lg bg-rose-950/40 border border-rose-800/50 text-rose-300 hover:bg-rose-900/40 transition">
+            🔴 Cyrillic Spoof
+          </button>
+          <button data-sample-url="http://192.168.1.1/admin-login" class="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700/50 transition">
+            ⚠️ Raw IP Host
+          </button>
+          <button data-sample-url="https://bit.ly/free-amazon-gift-voucher" class="px-2.5 py-1.5 rounded-lg bg-purple-950/40 border border-purple-800/50 text-purple-300 hover:bg-purple-900/40 transition">
+            🟣 Shortener
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode 2: File, Screenshot & APK Disguise Inspector -->
+      <div id="fileInputContainer" class="hidden space-y-4">
+        <div class="flex items-center justify-between text-xs text-slate-400 pb-1">
+          <span class="font-mono-code font-semibold flex items-center gap-1.5 text-cyan-400">
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            FILE / SCREENSHOT FORENSIC CHAMBER
+          </span>
+          <span class="text-slate-500">Detect APK traps, fake electricity bills, QR scams</span>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div
+          id="dropZone"
+          onclick="document.getElementById('fileUploadInput').click()"
+          class="border-2 border-dashed border-slate-700 hover:border-emerald-500/60 bg-slate-950/60 hover:bg-slate-950/90 rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-all duration-200 group flex flex-col items-center justify-center gap-3"
+        >
+          <input
+            type="file"
+            id="fileUploadInput"
+            class="hidden"
+            accept="image/*,.apk,.pdf,.doc,.docx"
+          >
+          <div class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-2xl group-hover:scale-110 group-hover:border-emerald-500/40 transition-all shadow-inner">
+            📁
+          </div>
+          <div>
+            <p class="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">
+              Drop screenshot, WhatsApp media, or suspicious file here
+            </p>
+            <p class="text-xs text-slate-400 mt-1">
+              Supports Images (JPG, PNG), Screenshots, WhatsApp APKs, and PDFs
+            </p>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] font-semibold text-slate-300">
+            <span>Or browse device files</span>
+          </span>
+        </div>
+
+        <!-- Quick Demo Presets for Files/Screenshots -->
+        <div class="pt-3 border-t border-slate-800/80 flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-slate-400 font-semibold mr-1 flex items-center gap-1">
+            <span>⚡</span>
+            <span>Simulate Scam Files:</span>
+          </span>
+          <button data-demo-file="wedding_apk" class="px-2.5 py-1.5 rounded-lg bg-rose-950/40 border border-rose-800/50 text-rose-300 hover:bg-rose-900/40 transition">
+            🚨 Wedding_Card.pdf.apk (Android Trojan)
+          </button>
+          <button data-demo-file="electricity_bill" class="px-2.5 py-1.5 rounded-lg bg-amber-950/40 border border-amber-800/50 text-amber-300 hover:bg-amber-900/40 transition">
+            ⚡ Fake Electricity Disconnection Notice
+          </button>
+          <button data-demo-file="fake_qr" class="px-2.5 py-1.5 rounded-lg bg-purple-950/40 border border-purple-800/50 text-purple-300 hover:bg-purple-900/40 transition">
+            💳 "Payment Received" Fake QR Code Trap
+          </button>
+          <button data-demo-file="echallan_pdf" class="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700/50 transition">
+            📄 Traffic_Fine_Notice.pdf.apk
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Inspection Output Section -->
+    <div id="resultsWrapper" class="space-y-6 hidden">
+
+      <!-- Overall Score Banner: Clean HUD Format -->
+      <section id="scoreCard" class="p-6 rounded-2xl border transition-all duration-300 bg-slate-900/80 backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-5 w-full md:w-auto">
+          <!-- Circular Score Dial -->
+          <div class="relative w-24 h-24 flex-shrink-0 flex items-center justify-center">
+            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+              <path class="text-slate-800" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path id="scoreMeterPath" class="transition-all duration-700 ease-out" stroke-dasharray="0, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            </svg>
+            <div class="absolute flex flex-col items-center justify-center">
+              <span id="scoreText" class="text-2xl font-black font-mono-code leading-none">--</span>
+              <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Trust</span>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="riskBadge" class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full">Analyzing</span>
+            </div>
+            <h2 id="riskTitle" class="text-xl sm:text-2xl font-extrabold text-white mt-1">Calculating threat potential...</h2>
+            <p id="riskSubtitle" class="text-xs sm:text-sm text-slate-400 mt-0.5">Please review the anatomical breakdowns below before proceeding.</p>
+            <span id="confidenceBadge" class="inline-flex mt-2 text-[10px] font-mono-code uppercase tracking-wide text-slate-500 border border-slate-800 rounded-full px-2 py-0.5">Heuristic confidence: --</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+          <div id="quickRecommendation" class="text-right hidden md:block">
+            <span class="text-xs uppercase text-slate-500 font-bold tracking-wider">Recommended Action</span>
+            <p id="recActionText" class="text-sm font-semibold text-slate-200">Checking link...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- URL Anatomy Visualizer: "The Microscope Slide" -->
+      <section class="bg-slate-900/80 rounded-2xl border border-slate-800 p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <span>🔬 URL Anatomy Deconstruction</span>
+          </h3>
+          <span class="text-xs text-slate-500 font-mono-code">Visual Component Decomposition</span>
+        </div>
+
+        <p class="text-xs text-slate-400">
+          Scammers deceive by stuffing famous brand names into subdomains. Look at the <strong class="text-emerald-400">highlighted box</strong>: that is the true server destination.
+        </p>
+
+        <!-- Visual Pills Container -->
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800/80 flex flex-wrap items-center gap-1.5 font-mono-code text-sm break-all">
+          <span id="pillProtocol" class="px-2.5 py-1 rounded-md font-semibold transition-colors" title="Protocol">--</span>
+          <span class="text-slate-600 font-bold select-none">//</span>
+          <span id="pillSubdomain" class="px-2.5 py-1 rounded-md transition-colors" title="Subdomain">--</span>
+          <span id="pillRootDomain" class="px-3 py-1 rounded-md font-bold ring-2 ring-emerald-500/40 transition-colors" title="Actual Root Domain">--</span>
+          <span id="pillPath" class="px-2.5 py-1 rounded-md transition-colors text-slate-400" title="Path / Resource">--</span>
+        </div>
+
+        <!-- 3-Column Diagnostic Summary -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
+          <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/70">
+            <span class="text-slate-500 block font-semibold mb-1">True Destination Owner</span>
+            <span id="detailRootDomain" class="font-mono-code text-emerald-400 font-semibold text-sm">--</span>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/70">
+            <span class="text-slate-500 block font-semibold mb-1">Punycode / Raw ASCII</span>
+            <span id="detailPunycode" class="font-mono-code text-slate-300 text-sm">--</span>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/70">
+            <span class="text-slate-500 block font-semibold mb-1">Channel Encryption</span>
+            <span id="detailEncryption" class="font-semibold text-sm">--</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI Threat Intelligence & Forensic Dossier -->
+      <section class="bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 rounded-2xl border border-emerald-500/30 p-6 shadow-xl space-y-4 relative overflow-hidden">
+        <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-400 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-emerald-500/20">
+              ✨
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-bold text-white tracking-tight">Gemini AI Threat Intelligence</h3>
+                <span class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 font-semibold border border-emerald-500/30">gemini-3-flash</span>
+              </div>
+              <p class="text-xs text-slate-400">Contextual social-engineering deconstruction & automated incident reporting</p>
+            </div>
+          </div>
+
+          <!-- Analysis Mode Selection Buttons -->
+          <div class="flex flex-wrap gap-1.5 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+            <button
+              type="button"
+              data-ai-mode="forensic"
+              id="btnAiForensic"
+              class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition hover:bg-emerald-500/30"
+            >
+              🔬 Deep Forensic Analysis
+            </button>
+            <button
+              type="button"
+              data-ai-mode="simple"
+              id="btnAiSimple"
+              class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition"
+            >
+              🗣️ Simple Hindi/English Explainer
+            </button>
+            <button
+              type="button"
+              data-ai-mode="report"
+              id="btnAiReport"
+              class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition"
+            >
+              📝 Draft Cyber Complaint
+            </button>
+          </div>
+        </div>
+
+        <!-- AI Output Box -->
+        <div id="aiOutputContainer" class="min-h-[140px] flex flex-col justify-center">
+          <div id="aiPlaceholder" class="text-center py-6 text-slate-400 text-xs space-y-2">
+            <p class="text-slate-300 font-semibold text-sm">Want an automated cyber forensic assessment?</p>
+            <p class="max-w-md mx-auto text-slate-400">Gemini will cross-examine the heuristic indicators, break down psychological traps, and generate immediate response recommendations.</p>
+            <button
+              data-ai-mode="forensic"
+              class="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-xs hover:brightness-110 transition shadow-lg shadow-emerald-500/20 active:scale-95"
+            >
+              <span>Run Gemini Threat Analysis</span>
+              <span>✨</span>
+            </button>
+          </div>
+
+          <!-- Loading state with animated skeleton -->
+          <div id="aiLoading" class="hidden space-y-3 py-4">
+            <div class="flex items-center gap-2 text-xs font-mono-code text-emerald-400 animate-pulse">
+              <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span id="aiLoadingText">Querying Gemini 3 Flash security model...</span>
+            </div>
+            <div class="h-4 bg-slate-800/80 rounded-lg animate-pulse w-3/4"></div>
+            <div class="h-4 bg-slate-800/80 rounded-lg animate-pulse w-full"></div>
+            <div class="h-4 bg-slate-800/80 rounded-lg animate-pulse w-5/6"></div>
+          </div>
+
+          <!-- Live Content -->
+          <div id="aiResultText" class="hidden text-xs sm:text-sm text-slate-200 leading-relaxed font-normal space-y-3">
+            <!-- Formatted via JS -->
+          </div>
+
+          <!-- Grounding Citations -->
+          <div id="aiSources" class="hidden pt-3 border-t border-slate-800/80 mt-3 text-[11px] text-slate-400">
+            <span class="font-bold text-slate-300">Grounding Web References:</span>
+            <div id="aiSourcesList" class="flex flex-wrap gap-2 mt-1.5"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lower Grid: Detected Flags & Security Guidance -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Detected Risk Flags -->
+        <div class="bg-slate-900/80 rounded-2xl border border-slate-800 p-6 flex flex-col space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <span>⚠️ Heuristic Risk Indicators</span>
+            </h3>
+            <span id="flagCounter" class="text-xs px-2.5 py-0.5 rounded-full font-mono-code bg-slate-800 text-slate-300 font-semibold">0 Flags</span>
+          </div>
+          <div id="riskList" class="flex-1 space-y-2.5 overflow-y-auto max-h-96 pr-1">
+            <!-- Injected via JavaScript -->
+          </div>
+        </div>
+
+        <!-- Safe Guidance & Golden Security Rules -->
+        <div class="bg-slate-900/80 rounded-2xl border border-slate-800 p-6 flex flex-col space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <span>💡 Security Guidance & Verification</span>
+            </h3>
+            <span class="text-xs text-emerald-400 font-semibold">Best Practices</span>
+          </div>
+          <div class="space-y-3 text-xs leading-relaxed text-slate-300">
+            <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/70 flex gap-3">
+              <span class="text-xl">🔎</span>
+              <div>
+                <p class="font-bold text-slate-200">Inspect the Root Host</p>
+                <p class="text-slate-400 mt-0.5">Scammers put trusted names (like <code class="text-amber-400">sbi.com</code>) inside subdomains. Only the root host right before the first slash determines who owns the server.</p>
+              </div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/70 flex gap-3">
+              <span class="text-xl">🛑</span>
+              <div>
+                <p class="font-bold text-slate-200">Zero Trust for Urgent SMS</p>
+                <p class="text-slate-400 mt-0.5">Legitimate institutions like banks, utilities, or tech providers never send random links demanding immediate OTP or KYC validation.</p>
+              </div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/70 flex gap-3">
+              <span class="text-xl">🌐</span>
+              <div>
+                <p class="font-bold text-slate-200">Abused High-Risk TLDs</p>
+                <p class="text-slate-400 mt-0.5">TLDs like <code class="text-rose-400">.top</code>, <code class="text-rose-400">.xyz</code>, or <code class="text-rose-400">.buzz</code> have virtually zero registration cost and are statistically used in bulk automated phishing.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 mt-auto">
+            <button
+              id="copyReportBtn"
+              class="w-full py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 font-semibold text-xs tracking-wide transition border border-slate-700 flex items-center justify-center gap-2 shadow-sm"
+            >
+              <span>📋 Copy Diagnostic Report</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Notification Toast for Copied Actions -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 border border-emerald-500/50 text-white px-4 py-2.5 rounded-xl shadow-2xl text-xs font-semibold transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50 flex items-center gap-2">
+      <span class="text-emerald-400">✓</span>
+      <span id="toastMsg">Report copied to clipboard!</span>
+    </div>
+
+  </main>
+
+  <footer class="mt-auto border-t border-slate-800/60 bg-slate-950/80 backdrop-blur-md py-6 text-center text-xs text-slate-500">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="font-medium text-slate-400">PhishLens &mdash; Built for HackNowa Digital Safety & Cybersecurity Track.</p>
+      <div class="flex items-center gap-4 text-slate-500 text-[11px]">
+        <span>Local Heuristics + Optional AI</span>
+        <span>•</span>
+        <span>AI requests stay behind your backend</span>
+        <span>•</span>
+        <span>No Data Stored</span>
+      </div>
+    </div>
+  </footer>
+
+    <script type="module" src="/js/app.js"></script>
+
+</body>
+</html>
